@@ -147,26 +147,40 @@ def _fig_eficiencia(tabla):
 
 
 def _fig_dispersion_escenarios(escenarios):
-    fig, ax = plt.subplots(figsize=(9, 5))
+    fig, ax = plt.subplots(figsize=(10, 5.8))
     etiquetas = {
-        "base": "base",
-        "estable": "a=3.0 estable",
-        "sensibilidad_020": "perturbacion=0.20",
-        "sensibilidad_021": "perturbacion=0.21",
-        "densidad_L40": "L=40",
-        "densidad_L50": "L=50",
+        "flujo_uniforme": "Flujo uniforme",
+        "perturbacion_leve": "Perturbación leve",
+        "perturbacion_fuerte": "Perturbación fuerte",
+        "varias_perturbaciones": "Varias perturbaciones",
+        "reaccion_lenta": "Reacción lenta",
+        "reaccion_alta": "Reacción alta",
+        "alta_densidad": "Alta densidad",
     }
     for nombre, resultado in escenarios.items():
         N_local = resultado["y"].shape[1] // 2
         v = resultado["y"][:, N_local:]
-        ax.plot(resultado["t"], np.std(v, axis=1), label=etiquetas.get(nombre, nombre))
+        ax.plot(resultado["t"], np.std(v, axis=1), label=etiquetas.get(nombre, nombre), linewidth=1.8)
     ax.set_xlabel("Tiempo")
     ax.set_ylabel("Dispersión de velocidades")
-    ax.set_title("Escenarios comparativos")
-    ax.legend()
+    ax.set_title("Escenarios para interpretar ondas de congestión")
+    ax.legend(ncol=2, fontsize=9)
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
     return fig
+
+
+def _descripcion_escenario(nombre):
+    descripciones = {
+        "flujo_uniforme": "Referencia sin perturbación: todos los vehículos inician igualmente espaciados.",
+        "perturbacion_leve": "Pequeña irregularidad inicial; permite ver si el flujo la absorbe o la amplifica.",
+        "perturbacion_fuerte": "Irregularidad grande; muestra una onda de frenado más visible.",
+        "varias_perturbaciones": "Tres irregularidades iniciales; permite observar interacción entre ondas.",
+        "reaccion_lenta": "Conductores ajustan lento su velocidad; las oscilaciones pueden persistir más.",
+        "reaccion_alta": "Conductores ajustan rápido su velocidad; compara amortiguamiento frente al caso lento.",
+        "alta_densidad": "Misma cantidad de vehículos en una vía más corta; reduce la separación promedio.",
+    }
+    return descripciones.get(nombre, "")
 
 
 st.title("OVM Tráfico Bando")
@@ -260,6 +274,10 @@ with tabs[4]:
 with tabs[5]:
     with st.spinner("Ejecutando escenarios comparativos..."):
         escenarios = _ejecutar_escenarios(N, L, t0, tf, h, perturbacion)
+    st.write(
+        "Estos escenarios comparan cómo cambia la dispersión de velocidades cuando se modifica "
+        "la perturbación inicial, la reacción de los conductores o la densidad de la vía."
+    )
     _mostrar_figura(_fig_dispersion_escenarios(escenarios), "escenarios_comparativos.png")
     resumen = []
     for nombre, resultado in escenarios.items():
@@ -268,6 +286,7 @@ with tabs[5]:
         resumen.append(
             {
                 "escenario": nombre,
+                "interpretacion": _descripcion_escenario(nombre),
                 "dispersion_final": float(np.std(v[-1])),
                 "dispersion_maxima": float(np.max(np.std(v, axis=1))),
                 "tiempo_segundos": resultado["tiempo"],

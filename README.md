@@ -99,7 +99,3 @@ Para exponer la animacion:
 - Tablas: `resultados/tablas/`
 - Figuras: `resultados/figuras/`
 - Animaciones: `resultados/animaciones/`
-
-## Uso de IA
-
-La IA se uso como apoyo conceptual y de organizacion para estructurar el codigo, documentar el modelo, preparar verificaciones y automatizar la generacion de resultados. Las ecuaciones, metodos y conclusiones deben revisarse y defenderse dentro del contexto del curso.

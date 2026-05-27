@@ -54,14 +54,24 @@ def resolver_rk45(N, L, a, t0, tf, t_eval, perturbacion):
 
 
 def ejecutar_escenarios(N, L, t0, tf, h, perturbacion):
-    # Ejecuta los escenarios obligatorios con RK4 para graficas comparativas
+    # Ejecuta casos interpretables para comparar ondas de congestion
+    amplitud_base = 0.2 if np.isscalar(perturbacion) else 0.2
+    amplitud_fuerte = min(0.45 * L / N, max(0.35, abs(amplitud_base) * 2.0))
+    varias_perturbaciones = [
+        (N // 4, amplitud_base),
+        (N // 2, -0.5 * amplitud_base),
+        ((3 * N) // 4, amplitud_base),
+    ]
+    L_alta_densidad = max(20.0, 0.75 * L)
+    a_base = 1.0
     escenarios = {
-        "base": {"N": N, "L": L, "a": 1.0, "perturbacion": perturbacion},
-        "estable": {"N": N, "L": L, "a": 3.0, "perturbacion": perturbacion},
-        "sensibilidad_020": {"N": N, "L": L, "a": 1.0, "perturbacion": 0.20},
-        "sensibilidad_021": {"N": N, "L": L, "a": 1.0, "perturbacion": 0.21},
-        "densidad_L40": {"N": N, "L": 40.0, "a": 1.0, "perturbacion": perturbacion},
-        "densidad_L50": {"N": N, "L": 50.0, "a": 1.0, "perturbacion": perturbacion},
+        "flujo_uniforme": {"N": N, "L": L, "a": a_base, "perturbacion": 0.0},
+        "perturbacion_leve": {"N": N, "L": L, "a": a_base, "perturbacion": 0.05},
+        "perturbacion_fuerte": {"N": N, "L": L, "a": a_base, "perturbacion": amplitud_fuerte},
+        "varias_perturbaciones": {"N": N, "L": L, "a": a_base, "perturbacion": varias_perturbaciones},
+        "reaccion_lenta": {"N": N, "L": L, "a": 0.4, "perturbacion": amplitud_base},
+        "reaccion_alta": {"N": N, "L": L, "a": 3.0, "perturbacion": amplitud_base},
+        "alta_densidad": {"N": N, "L": L_alta_densidad, "a": a_base, "perturbacion": amplitud_base},
     }
     resultados = {}
     for nombre, params in escenarios.items():
