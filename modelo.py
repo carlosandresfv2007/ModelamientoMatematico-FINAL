@@ -25,11 +25,29 @@ def ovm(t, y, N, L, a):
     return np.concatenate([dxdt, dvdt])
 
 
+def normalizar_perturbaciones(N, perturbacion):
+    # Convierte una perturbacion unica o multiple a pares (indice, amplitud)
+    if np.isscalar(perturbacion):
+        return [(N // 2, float(perturbacion))]
+
+    perturbaciones = []
+    for item in perturbacion:
+        if isinstance(item, dict):
+            indice = int(item["indice"])
+            amplitud = float(item["amplitud"])
+        else:
+            indice, amplitud = item
+            indice = int(indice)
+            amplitud = float(amplitud)
+        perturbaciones.append((indice % N, amplitud))
+    return perturbaciones
+
+
 def estado_inicial(N, L, perturbacion):
-    # Construye posiciones uniformes con una pequena perturbacion
+    # Construye posiciones uniformes con una o varias perturbaciones
     indices = np.arange(N, dtype=float)
     x0 = indices * L / N
-    indice_perturbado = N // 2
-    x0[indice_perturbado] += perturbacion
+    for indice, amplitud in normalizar_perturbaciones(N, perturbacion):
+        x0[indice] += amplitud
     v0 = np.full(N, velocidad_optima(L / N), dtype=float)
     return np.concatenate([x0, v0])

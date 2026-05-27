@@ -62,6 +62,28 @@ def grafica_convergencia(tabla):
     _guardar(fig, "convergencia_metodos.png")
 
 
+def grafica_eficiencia(tabla):
+    fig, ax = plt.subplots(figsize=(8, 5))
+    for metodo, grupo in tabla.groupby("metodo"):
+        ax.scatter(grupo["tiempo_segundos"], grupo["error_promedio"], label=metodo, s=55)
+        for _, fila in grupo.iterrows():
+            ax.annotate(
+                f"h={fila['h']:g}",
+                (fila["tiempo_segundos"], fila["error_promedio"]),
+                textcoords="offset points",
+                xytext=(5, 5),
+                fontsize=8,
+            )
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("Tiempo de cómputo (s)")
+    ax.set_ylabel("Error promedio")
+    ax.set_title("Eficiencia: costo computacional vs error")
+    ax.legend()
+    ax.grid(True, which="both", alpha=0.3)
+    _guardar(fig, "eficiencia_metodos.png")
+
+
 def grafica_plano_fase(resultado, N, L):
     x = resultado["y"][:, :N]
     v = resultado["y"][:, N:]
@@ -130,6 +152,7 @@ def generar_graficas_base(N, L, a, t0, tf, h, perturbacion, resultados=None, tab
     grafica_evolucion_velocidades(resultados["RK4"], N)
     grafica_regimenes(N, L, t0, tf, h, perturbacion)
     grafica_convergencia(tabla)
+    grafica_eficiencia(tabla)
     grafica_plano_fase(resultados["RK4"], N, L)
     grafica_comparacion_metodos(resultados, rk45, N, h)
     grafica_sensibilidad(N, L, a, t0, tf, h)
